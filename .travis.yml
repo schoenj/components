@@ -36,6 +36,6 @@ deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
-  local_dir: dist/prosoft-components-demo
+  # local_dir: dist/prosoft-components-demo
   on:
     branch: master

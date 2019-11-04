@@ -3,112 +3,6 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "prosoft-components-demo": {
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "root": "projects/prosoft-components-demo",
-      "sourceRoot": "projects/prosoft-components-demo/src",
-      "prefix": "app",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:browser",
-          "options": {
-            "outputPath": "dist/prosoft-components-demo",
-            "index": "projects/prosoft-components-demo/src/index.html",
-            "main": "projects/prosoft-components-demo/src/main.ts",
-            "polyfills": "projects/prosoft-components-demo/src/polyfills.ts",
-            "tsConfig": "projects/prosoft-components-demo/tsconfig.app.json",
-            "aot": true,
-            "assets": ["projects/prosoft-components-demo/src/favicon.ico", "projects/prosoft-components-demo/src/assets"],
-            "styles": ["projects/prosoft-components-demo/src/styles.scss"],
-            "scripts": []
-          },
-          "configurations": {
-            "production": {
-              "fileReplacements": [
-                {
-                  "replace": "projects/prosoft-components-demo/src/environments/environment.ts",
-                  "with": "projects/prosoft-components-demo/src/environments/environment.prod.ts"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "extractCss": true,
-              "namedChunks": false,
-              "aot": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
-                }
-              ]
-            }
-          }
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "browserTarget": "prosoft-components-demo:build",
-            "port": 4500
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "prosoft-components-demo:build:production"
-            }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "browserTarget": "prosoft-components-demo:build"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "projects/prosoft-components-demo/src/test.ts",
-            "polyfills": "projects/prosoft-components-demo/src/polyfills.ts",
-            "tsConfig": "projects/prosoft-components-demo/tsconfig.spec.json",
-            "karmaConfig": "projects/prosoft-components-demo/karma.conf.js",
-            "assets": ["projects/prosoft-components-demo/src/favicon.ico", "projects/prosoft-components-demo/src/assets"],
-            "styles": ["projects/prosoft-components-demo/src/styles.scss"],
-            "scripts": []
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/prosoft-components-demo/tsconfig.app.json",
-              "projects/prosoft-components-demo/tsconfig.spec.json",
-              "projects/prosoft-components-demo/e2e/tsconfig.json"
-            ],
-            "exclude": ["**/node_modules/**"]
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "projects/prosoft-components-demo/e2e/protractor.conf.js",
-            "devServerTarget": "prosoft-components-demo:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "prosoft-components-demo:serve:production"
-            }
-          }
-        }
-      }
-    },
     "components": {
       "projectType": "library",
       "root": "projects/components",
@@ -119,7 +13,10 @@
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
             "tsConfig": "projects/components/tsconfig.lib.json",
-            "project": "projects/components/ng-package.json"
+            "project": "projects/components/ng-package.json",
+            "styles": ["./node_modules/@angular/material/prebuilt-themes/indigo-pink.css"],
+            "scripts": [],
+            "outputPath": ""
           }
         },
         "test": {
@@ -139,6 +36,5 @@
         }
       }
     }
-  },
-  "defaultProject": "prosoft-components-demo"
+  }
 }
