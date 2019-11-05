@@ -14,7 +14,7 @@
     "release:step3": "ng build components",
     "release:step4": "cd dist/components && npm publish",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook -s public -o dist/storybook-static"
   },
   "private": false,
   "dependencies": {

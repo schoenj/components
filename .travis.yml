@@ -26,16 +26,20 @@ script:
   - ng build components
   - ng test components --watch=false --no-progress --browsers=ChromeHeadlessNoSandbox
   - ng build --prod --baseHref=https://prosoft-edv.github.io/components/
+  - npm run build-storybook
 
 notifications:
   email:
     on_failure: change
     on_success: change
 
+# Deployment information
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  # local_dir: dist/prosoft-components-demo
+  provider: pages # Tell Travis we want to deploy to Github Pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN # Will take the environment variable you created
+  local_dir: dist/storybook-static # The folder that needs to be deployed
+  repo: prosoft-edv/components # your project name
+  target_branch: gh-pages # Tell Travis to deploy on the gh-pages branch
   on:
-    branch: master
+    branch: master # Tell Travis to trigger a deploy only when we push to master
