@@ -17,7 +17,7 @@ export default {
   parameters: { notes: documentation },
 };
 
-export function example(): StoryFnAngularReturnType {
+export function showcase(): StoryFnAngularReturnType {
   return {
     template: `
       <ps-flip-container #flip style="display:block; width: 100px; height: 100px;">
