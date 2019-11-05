@@ -1,17 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatCardModule, MatCheckboxModule, MatFormFieldModule, MatInputModule } from '@angular/material';
+import { MatCardModule } from '@angular/material/card';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PsBlockUiModule } from '@prosoft/components/block-ui';
 import { moduleMetadata, storiesOf } from '@storybook/angular';
+import { text, withKnobs, boolean } from '@storybook/addon-knobs';
+import documentation from './block-ui.documentation.md';
 
-storiesOf('BlockUi', module)
+const story = storiesOf('BlockUi', module)
+  .addDecorator(withKnobs)
   .addDecorator(
     moduleMetadata({
       imports: [BrowserAnimationsModule, CommonModule, MatCardModule, PsBlockUiModule],
     })
-  )
-  .add('Normal sized area', () => {
+  );
+
+story.add(
+  'Normal sized area',
+  () => {
     return {
       template: `
         <ps-block-ui [blocked]="blocked" [spinnerText]="spinnerText">
@@ -21,12 +26,17 @@ storiesOf('BlockUi', module)
         </ps-block-ui>
       `,
       props: {
-        blocked: true,
-        spinnerText: 'some custom text that will be displayed while the view is blocked',
+        blocked: boolean('blocked', true),
+        spinnerText: text('spinnerText', 'some custom text that will be displayed while the view is blocked'),
       },
     };
-  })
-  .add('Small sized area', () => {
+  },
+  { notes: documentation }
+);
+
+story.add(
+  'Small sized area',
+  () => {
     return {
       template: `
         <ps-block-ui [blocked]="blocked" [spinnerText]="spinnerText">
@@ -36,12 +46,17 @@ storiesOf('BlockUi', module)
         </ps-block-ui>
       `,
       props: {
-        blocked: true,
-        spinnerText: 'some custom text that will be displayed while the view is blocked',
+        blocked: boolean('blocked', true),
+        spinnerText: text('spinnerText', 'some custom text that will be displayed while the view is blocked'),
       },
     };
-  })
-  .add('Large sized area', () => {
+  },
+  { notes: documentation }
+);
+
+story.add(
+  'Large sized area',
+  () => {
     return {
       template: `
         <ps-block-ui [blocked]="blocked" [spinnerText]="spinnerText">
@@ -51,8 +66,10 @@ storiesOf('BlockUi', module)
         </ps-block-ui>
       `,
       props: {
-        blocked: true,
-        spinnerText: 'some custom text that will be displayed while the view is blocked',
+        blocked: boolean('blocked', true),
+        spinnerText: text('spinnerText', 'some custom text that will be displayed while the view is blocked'),
       },
     };
-  });
+  },
+  { notes: documentation }
+);
