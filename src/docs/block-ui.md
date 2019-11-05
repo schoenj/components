@@ -3,7 +3,7 @@
 
 While ` blocked === true` all of `<ps-block-ui>`'s content is overlayed by a transparent frame with a loading spinner and an optional `spinnerText`. During blocked-state it's not possible to click any control underneath the block-ui.
 
-## Api
+## API
 ### Import
 ```javascript
 import { PsBlockUiComponent  } from '@prosoft/components/block-ui'
