@@ -14,5 +14,9 @@ addParameters({
   }
 });
 
+// Sort stories by filename
+const req = require.context('../src/stories', true, /\.stories\.ts$/);
+req.keys().sort().forEach(filename => req(filename));
+
 // automatically import all files ending in *.stories.ts
-configure(require.context('../src/stories', true, /\.stories\.ts$/), module);
+configure(req, module);
