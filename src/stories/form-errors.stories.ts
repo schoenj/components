@@ -44,7 +44,7 @@ export default {
 export function showcase(): StoryFnAngularReturnType {
   return {
     template: `
-    <div [formGroup]="form" novalidate>
+    <div [formGroup]="form">
       <input type="text" [formControlName]="'input1'" />
       <input type="text" [formControlName]="'input2'" />
     </div>
