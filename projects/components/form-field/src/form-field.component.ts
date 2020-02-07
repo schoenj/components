@@ -12,6 +12,8 @@ import {
   QueryList,
   ViewChild,
   ViewEncapsulation,
+  TemplateRef,
+  ViewContainerRef,
 } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 import { FloatLabelType } from '@angular/material/core';
@@ -20,6 +22,18 @@ import { hasRequiredField, IPsFormError, PsFormService } from '@prosoft/componen
 import { Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DummyMatFormFieldControl } from './dummy-mat-form-field-control';
+import {
+  ConnectedPositionStrategy,
+  FlexibleConnectedPositionStrategy,
+  ScrollStrategyOptions,
+  NoopScrollStrategy,
+  Overlay,
+  PositionStrategy,
+  ConnectionPositionPair,
+  OverlayConfig,
+  OverlayRef,
+} from '@angular/cdk/overlay';
+import { TemplatePortal, Portal } from '@angular/cdk/portal';
 
 @Component({
   selector: 'ps-form-field',
@@ -29,7 +43,7 @@ import { DummyMatFormFieldControl } from './dummy-mat-form-field-control';
       [class.mat-form-field--emulated]="emulated"
       [class.mat-form-field--no-underline]="noUnderline"
       [floatLabel]="floatLabel"
-      [hintLabel]="showHint ? hint : null"
+      [hintLabel]="hint"
       [appearance]="appearance"
     >
       <mat-label *ngIf="_labelChild">
@@ -51,6 +65,11 @@ import { DummyMatFormFieldControl } from './dummy-mat-form-field-control';
 
       <mat-error *ngFor="let error of errors$ | async">{{ error.errorText }}</mat-error>
     </mat-form-field>
+    <div #targetOrigin></div>
+    <ng-template #paneltpl>
+      <div style="color: blue;">hint</div>
+      <div *ngFor="let error of errors$ | async" style="color: red;">{{ error.errorText }}</div>
+    </ng-template>
   `,
   styles: [
     `
@@ -199,6 +218,9 @@ import { DummyMatFormFieldControl } from './dummy-mat-form-field-control';
   encapsulation: ViewEncapsulation.None,
 })
 export class PsFormFieldComponent implements AfterContentInit, OnDestroy {
+  @ViewChild('paneltpl', { static: true }) public _paneltpl: TemplateRef<any>;
+  @ViewChild('targetOrigin', { static: true, read: ElementRef }) public _target: ElementRef<any>;
+
   @Input() public createLabel = true;
   @Input() public floatLabel: FloatLabelType = 'auto';
   @Input() public hint: string = null;
@@ -261,9 +283,18 @@ export class PsFormFieldComponent implements AfterContentInit, OnDestroy {
 
   private hasError = false;
 
+  private _overlayRef: OverlayRef;
+  private _portal: Portal<any>;
   private labelTextSubscription: Subscription;
 
-  constructor(private _elementRef: ElementRef, private formsService: PsFormService, private cd: ChangeDetectorRef) {}
+  constructor(
+    private _elementRef: ElementRef,
+    private formsService: PsFormService,
+    private cd: ChangeDetectorRef,
+    private sso: ScrollStrategyOptions,
+    private overlay: Overlay,
+    private viewContainerRef: ViewContainerRef
+  ) {}
 
   public ngAfterContentInit(): void {
     this.formControl = this._ngControl && (this._ngControl.control as FormControl);
@@ -303,10 +334,22 @@ export class PsFormFieldComponent implements AfterContentInit, OnDestroy {
     if (this.labelTextSubscription) {
       this.labelTextSubscription.unsubscribe();
     }
+    this._overlayRef.dispose();
   }
 
   public toggleHint(event: MouseEvent) {
-    this.showHint = !this.showHint;
+    if (!this._overlayRef) {
+      this._overlayRef = this.overlay.create({
+        positionStrategy: this.getOverlayPosition(this._target.nativeElement),
+        scrollStrategy: this.overlay.scrollStrategies.reposition(),
+      });
+      this._portal = new TemplatePortal(this._paneltpl, this.viewContainerRef);
+    }
+    if (!this._overlayRef.hasAttached()) {
+      this._overlayRef.attach(this._portal);
+    } else {
+      this._overlayRef.detach();
+    }
     event.stopPropagation();
   }
 
@@ -342,6 +385,33 @@ export class PsFormFieldComponent implements AfterContentInit, OnDestroy {
       // when labelText$ didn't run synchronously
       (<any>this._matFormField)._changeDetectorRef.markForCheck();
     });
+  }
+
+  private getOverlayPosition(origin: HTMLElement): PositionStrategy {
+    const positionStrategy = this.overlay
+      .position()
+      .flexibleConnectedTo(origin)
+      .withPositions(this.getPositions())
+      .withPush(false);
+
+    return positionStrategy;
+  }
+
+  private getPositions(): ConnectionPositionPair[] {
+    return [
+      {
+        originX: 'end',
+        originY: 'top',
+        overlayX: 'end',
+        overlayY: 'bottom',
+      },
+      {
+        originX: 'end',
+        originY: 'bottom',
+        overlayX: 'end',
+        overlayY: 'top',
+      },
+    ];
   }
 }
 

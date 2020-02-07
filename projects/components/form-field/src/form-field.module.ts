@@ -1,3 +1,4 @@
+import { OverlayModule } from '@angular/cdk/overlay';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { PsFormFieldComponent } from './form-field.component';
 
 @NgModule({
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, OverlayModule, ReactiveFormsModule, MatFormFieldModule, MatIconModule, MatButtonModule],
   declarations: [PsFormFieldComponent],
   exports: [PsFormFieldComponent],
 })
