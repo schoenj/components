@@ -200,28 +200,6 @@ describe('PsFormComponent', () => {
       expect(contentNode).toBeFalsy();
     });
 
-    it('should forward form and savebarMode to savebar', async () => {
-      const fixture = TestBed.createComponent(TestDataSourceComponent);
-      const component = fixture.componentInstance;
-      expect(component).toBeDefined();
-
-      const dataSource = createDataSource();
-      component.dataSource = dataSource;
-      dataSource.form = new FormGroup({});
-      dataSource.savebarMode = 'auto';
-      fixture.detectChanges();
-
-      const savebar: PsSavebarComponent = getSavebar(fixture).componentInstance;
-      expect(savebar.form).toBe(dataSource.form);
-      expect(savebar.mode).toBe(dataSource.savebarMode);
-
-      dataSource.savebarMode = 'fixed';
-      dataSource.cdTrigger$.next();
-      fixture.detectChanges();
-
-      expect(savebar.mode).toBe(dataSource.savebarMode);
-    });
-
     it("should call dataSource's connect() once per new dataSource", () => {
       const fixture = TestBed.createComponent(TestDataSourceComponent);
       const component = fixture.componentInstance;
@@ -285,7 +263,7 @@ describe('PsFormComponent', () => {
       expect(observerOptions).toEqual({
         root: null as any,
         rootMargin: '-100px',
-        threshold: 1.0,
+        threshold: 0,
       });
       expect(getErrorContainer(fixture)).not.toBe(null);
       expect(observedEl).toBe(component.formComponent.errorCardWrapper.nativeElement);
@@ -332,9 +310,6 @@ function getClasses(node: DebugElement): string[] {
 }
 function getBlockUi(fixture: ComponentFixture<any>): DebugElement {
   return fixture.debugElement.query(By.directive(PsBlockUiComponent));
-}
-function getSavebar(fixture: ComponentFixture<any>): DebugElement {
-  return fixture.debugElement.query(By.directive(PsSavebarComponent));
 }
 function getErrorContainer(fixture: ComponentFixture<any>): DebugElement {
   return fixture.debugElement.query(By.css('.ps-form__error-container'));

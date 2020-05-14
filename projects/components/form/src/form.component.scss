@@ -52,6 +52,10 @@ mat-card.ps-form__savebar--sticky {
   justify-content: flex-end;
   margin: -0.25em;
   width: 100%; /* Muss wegen display: flex auf 100% gestretched werden */
+
+  button {
+    margin: 0.25em;
+  }
 }
 
 .ps-form__savebar-spacer {
