@@ -6,7 +6,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { PsBlockUiModule } from '@prosoft/components/block-ui';
-import { PsSavebarModule } from '@prosoft/components/savebar';
+import { PsErrorMessagePipeModule } from '@prosoft/components/core';
+
 import { PsFormComponent } from './form.component';
 
 @NgModule({
@@ -21,7 +22,7 @@ import { PsFormComponent } from './form.component';
     MatButtonModule,
 
     PsBlockUiModule,
-    PsSavebarModule,
+    PsErrorMessagePipeModule,
   ],
   exports: [PsFormComponent],
 })
