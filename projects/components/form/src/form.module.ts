@@ -8,10 +8,11 @@ import { PsBlockUiModule } from '@prosoft/components/block-ui';
 import { PsErrorMessagePipeModule } from '@prosoft/components/core';
 import { PsFormErrorsModule } from '@prosoft/components/form-errors';
 
-import { PsFormComponent } from './form.component';
+import { PsFormSavebarContentDirective, PsFormSavebarContentDirective2 } from './form-savebar-content.directive';
+import { PsFormComponent, PsFormSavebarContentWrapperComponent } from './form.component';
 
 @NgModule({
-  declarations: [PsFormComponent],
+  declarations: [PsFormComponent, PsFormSavebarContentDirective, PsFormSavebarContentDirective2, PsFormSavebarContentWrapperComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -24,6 +25,7 @@ import { PsFormComponent } from './form.component';
     PsFormErrorsModule,
     PsErrorMessagePipeModule,
   ],
-  exports: [PsFormComponent],
+  exports: [PsFormComponent, PsFormSavebarContentDirective, PsFormSavebarContentDirective2, PsFormSavebarContentWrapperComponent],
+  entryComponents: [PsFormSavebarContentWrapperComponent],
 })
 export class PsFormModule {}

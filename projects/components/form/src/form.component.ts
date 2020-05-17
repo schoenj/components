@@ -3,21 +3,32 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ContentChildren,
   ElementRef,
   Input,
   OnDestroy,
+  QueryList,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, startWith } from 'rxjs/operators';
 
 import { IPsFormButton, IPsFormDataSource, IPsFormDataSourceConnectOptions, IPsFormException } from './form-data-source';
+import { PsFormSavebarContentDirective, PsFormSavebarContentDirective2 } from './form-savebar-content.directive';
 
 export const dependencies = {
   IntersectionObserver: IntersectionObserver,
 };
+
+@Component({
+  selector: 'ps-form-savebar-content-wrapper',
+  template: `
+    <ng-content></ng-content>
+  `,
+})
+export class PsFormSavebarContentWrapperComponent {}
 
 @Component({
   selector: 'ps-form',
@@ -27,6 +38,12 @@ export const dependencies = {
   encapsulation: ViewEncapsulation.None,
 })
 export class PsFormComponent implements AfterViewInit, OnDestroy {
+  PsFormSavebarContentWrapperComponent = PsFormSavebarContentWrapperComponent;
+
+  getSavebarContentNodes(name: string) {
+    return [[this._contentNodeMap.get(name)]];
+  }
+
   @Input() public set dataSource(value: IPsFormDataSource) {
     if (this._dataSource) {
       this._dataSource.disconnect();
@@ -46,6 +63,12 @@ export class PsFormComponent implements AfterViewInit, OnDestroy {
   }
   private _dataSource: IPsFormDataSource;
 
+  @ContentChildren(PsFormSavebarContentDirective)
+  public customRightContent: QueryList<PsFormSavebarContentDirective>;
+
+  @ContentChildren(PsFormSavebarContentDirective2)
+  public customRightContent2: QueryList<PsFormSavebarContentDirective2>;
+
   public get autocomplete() {
     return this.dataSource.autocomplete;
   }
@@ -54,8 +77,8 @@ export class PsFormComponent implements AfterViewInit, OnDestroy {
     return this.dataSource.form;
   }
 
-  public get buttons(): IPsFormButton[] {
-    return this.dataSource.buttons;
+  public get savebarItems(): (IPsFormButton | string)[] {
+    return this.dataSource.savebarItems;
   }
 
   public get savebarMode(): string {
@@ -91,6 +114,7 @@ export class PsFormComponent implements AfterViewInit, OnDestroy {
   private _errorCardObserver: IntersectionObserver;
   private _viewReady = false;
   private _errrorInView$ = new BehaviorSubject<boolean>(false);
+  private _contentNodeMap = new Map<string, ElementRef>();
 
   constructor(private cd: ChangeDetectorRef) {}
 
@@ -98,9 +122,20 @@ export class PsFormComponent implements AfterViewInit, OnDestroy {
     this._viewReady = true;
     this.updateErrorCardObserver();
     this.activateDataSource();
+
+    this.customRightContent2.changes
+      .pipe(startWith(this.customRightContent2.toArray()))
+      .subscribe((children: PsFormSavebarContentDirective2[]) => {
+        this._contentNodeMap.clear();
+        children.forEach(element => {
+          this._contentNodeMap.set(element.name, element.elementRef.nativeElement);
+        });
+      });
   }
 
   public ngOnDestroy() {
+    this._contentNodeMap.clear();
+
     if (this._errorCardObserver) {
       this._errorCardObserver.disconnect();
       this._errorCardObserver = null;

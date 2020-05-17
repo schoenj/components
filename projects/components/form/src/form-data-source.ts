@@ -26,7 +26,7 @@ export interface IPsFormDataSourceConnectOptions {
 export interface IPsFormDataSource {
   readonly form: FormGroup;
   readonly autocomplete: 'on' | 'off';
-  readonly buttons: IPsFormButton[];
+  readonly savebarItems: (IPsFormButton | string)[];
   readonly contentVisible: boolean;
   readonly contentBlocked: boolean;
   readonly exception: IPsFormException;

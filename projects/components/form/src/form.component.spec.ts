@@ -8,7 +8,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PsBlockUiComponent } from '@prosoft/components/block-ui';
 import { PsIntlService, PsIntlServiceEn } from '@prosoft/components/core';
 import { BasePsFormService, IPsFormError, IPsFormErrorData, PsFormService } from '@prosoft/components/form-base';
-import { PsSavebarComponent } from '@prosoft/components/savebar';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 
 import { IPsFormDataSource, IPsFormDataSourceConnectOptions } from './form-data-source';
@@ -68,7 +67,7 @@ describe('PsFormComponent', () => {
 
       let btn2Clicked = false;
       component.dataSource = createDataSource({
-        buttons: [
+        savebarItems: [
           { type: 'stroked', label: 'btn1', color: 'primary', disabled: () => true, click: () => {} },
           {
             type: 'raised',
@@ -290,7 +289,7 @@ function createDataSource(override: Partial<IPsFormDataSource> = {}): ITestPsFor
   return {
     autocomplete: 'off',
     cdTrigger$: cdTrigger$,
-    buttons: [],
+    savebarItems: [],
     contentBlocked: false,
     contentVisible: true,
     exception: null,

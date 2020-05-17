@@ -17,7 +17,7 @@ class DemoPsFormDataSource<TParams, TData> implements IPsFormDataSource {
   public get form(): FormGroup {
     return this.options.form;
   }
-  public buttons: IPsFormButton[] = [];
+  public savebarItems: (IPsFormButton | string)[] = [];
   public get contentVisible(): boolean {
     return !this._hasLoadError;
   }
@@ -189,16 +189,18 @@ class DemoPsFormDataSource<TParams, TData> implements IPsFormDataSource {
   }
 
   private updateButtons() {
-    this.buttons = [];
+    this.savebarItems = [];
     if (this.contentVisible) {
       if (!this._isEditMode) {
-        this.buttons.push(this.buttonDefs.edit);
+        this.savebarItems.push(this.buttonDefs.edit);
       } else {
+        this.savebarItems.push('asdf1');
         if (this.exception && !this._errorInView) {
-          this.buttons.push(this.buttonDefs.scrollToError);
+          this.savebarItems.push(this.buttonDefs.scrollToError);
         }
-        this.buttons.push(this.buttonDefs.save);
-        this.buttons.push(this.buttonDefs.cancel);
+        this.savebarItems.push(this.buttonDefs.save);
+        this.savebarItems.push('asdf2');
+        this.savebarItems.push(this.buttonDefs.cancel);
       }
     }
   }
@@ -231,6 +233,15 @@ class DemoPsFormDataSource<TParams, TData> implements IPsFormDataSource {
           <button mat-stroked-button type="button">dummy button 1</button>
           <button mat-stroked-button type="button">dummy button 2</button>
         </ng-container>
+        <div *psFormSavebarContent="'asdf'">
+          hallo welt
+        </div>
+        <ps-form-savebar-content [name]="'asdf1'">
+          hallo welt2 1
+        </ps-form-savebar-content>
+        <ps-form-savebar-content [name]="'asdf2'">
+          hallo welt2 2
+        </ps-form-savebar-content>
       </ps-form>
       <mat-card class="app-form-data-source-demo__logs">
         <div *ngFor="let log of logs" class="app-form-data-source-demo__log-item">{{ log | json }}</div>
