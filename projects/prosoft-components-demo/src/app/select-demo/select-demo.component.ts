@@ -100,7 +100,7 @@ interface DemoLogs {
           [panelClass]="{ 'app-select-demo__panel': panelClass }"
         ></ps-select>
       </mat-form-field>
-      <div [formGroup]="form">
+      <div [formGroup]="form" style="float:right">
         <mat-form-field>
           <mat-label>FormControl</mat-label>
           <ps-select
@@ -170,7 +170,7 @@ export class SelectDemoComponent implements OnInit {
   public items = Array.from(Array(500).keys()).map(i => ({
     id: i,
     strId: `id${i}`,
-    labelA: `Label A ${i}`,
+    labelA: `Label A ${i}` + (i === 1 ? '(this is the first item with a very long label)' : ''),
     labelB: `Label B ${i}`,
     disabled: i % 5 === 4,
   }));
