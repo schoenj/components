@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.0](https://github.com/prosoft-edv/components/compare/@prosoft/components@0.1.0-alpha.22...@prosoft/components@1.0.0-alpha.0) (2020-08-06)
+
+
+### Bug Fixes
+
+* **table:** don't loose custom setting properties ([#122](https://github.com/prosoft-edv/components/issues/122)) ([ab1f7bd](https://github.com/prosoft-edv/components/commit/ab1f7bd))
+
+
+
+
+
+
 # [0.1.0-alpha.22](https://github.com/prosoft-edv/components/compare/@prosoft/components@0.1.0-alpha.20...@prosoft/components@0.1.0-alpha.22) (2020-07-30)
 
 
