@@ -5,7 +5,7 @@
 export { TranslatePipe } from './src/translate.pipe';
 export { TranslateService } from './src/translate.service';
 export { Translations } from './src/translations';
-export { I18nModule } from '../../components/i18n/src/i18n.module';
+export { I18nModule } from './src/i18n.module';
 
 export { localizeServerKey } from './src/server-key';
 export { translate } from './src/helper';
