@@ -18,6 +18,7 @@ import { MatSelect } from '@angular/material/select';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of, ReplaySubject, Subject, Subscription, throwError } from 'rxjs';
+
 import { DefaultPsSelectDataSource } from './defaults/default-select-data-source';
 import { DefaultPsSelectService, PsSelectData } from './defaults/default-select-service';
 import { PsSelectItem } from './models';
@@ -218,8 +219,43 @@ describe('PsSelectComponent', () => {
     expect(component.disabled).toBe(false);
   });
 
-  // Probably unneccessary now
-  xit('should fix MatSelect.close() not emitting stateChanges', fakeAsync(() => {
+  it('should determine empty value correctly', () => {
+    const { component } = createPsSelect();
+    component.multiple = true;
+
+    const items = [
+      { value: 1, label: 'i1', hidden: false },
+      { value: 2, label: 'i2', hidden: false },
+    ];
+    component.dataSource = createFakeDataSource(items);
+
+    component.value = null;
+    expect(component.empty).toBe(true);
+
+    component.value = [];
+    expect(component.empty).toBe(true);
+
+    component.value = [items[0]];
+    expect(component.empty).toBe(false);
+
+    component.value = items;
+    expect(component.empty).toBe(false);
+
+    component.multiple = false;
+    component.value = null;
+    expect(component.empty).toBe(true);
+
+    component.value = {};
+    expect(component.empty).toBe(false);
+
+    component.value = '';
+    expect(component.empty).toBe(true);
+
+    component.value = 'some value';
+    expect(component.empty).toBe(false);
+  });
+
+  it('should fix MatSelect.close() not emitting stateChanges', fakeAsync(() => {
     const matSelect = createFakeMatSelect();
 
     const { component } = createPsSelect();
