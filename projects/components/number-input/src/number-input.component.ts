@@ -28,6 +28,7 @@ import {
 import { ControlValueAccessor, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import { CanUpdateErrorState, CanUpdateErrorStateCtor, ErrorStateMatcher, mixinErrorState } from '@angular/material/core';
 import { MatFormFieldControl } from '@angular/material/form-field';
+import { replaceAll } from '@prosoft/components/utils';
 import { Subject } from 'rxjs';
 
 import type { ElementRef } from '@angular/core';
@@ -70,8 +71,10 @@ const _PsNumberInputMixinBase: CanUpdateErrorStateCtor & typeof PsNumberInputBas
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class PsNumberInputComponent extends _PsNumberInputMixinBase
-  implements ControlValueAccessor, MatFormFieldControl<any>, OnChanges, OnDestroy, OnInit, DoCheck, CanUpdateErrorState {
+export class PsNumberInputComponent
+  extends _PsNumberInputMixinBase
+  implements ControlValueAccessor, MatFormFieldControl<any>, OnChanges, OnDestroy, OnInit, DoCheck, CanUpdateErrorState
+{
   /** Mininum boundary value. */
   @Input() min: number;
 
@@ -353,8 +356,8 @@ export class PsNumberInputComponent extends _PsNumberInputMixinBase
       return null;
     }
 
-    val = this._replaceAll(val, this._thousandSeparator, '');
-    val = this._replaceAll(val, this._decimalSeparator, '.');
+    val = replaceAll(val, this._thousandSeparator, '');
+    val = replaceAll(val, this._decimalSeparator, '.');
 
     value = this._fixNumber(parseFloat(val));
 
@@ -477,17 +480,5 @@ export class PsNumberInputComponent extends _PsNumberInputMixinBase
       this._formatValue();
       this._onModelTouched();
     }
-  }
-
-  private _replaceAll(val: string, searchValue: string, replaceValue: string): string {
-    // .replace interprets searchValue as an regex.
-    // Without specifying it with an /g for global, it replaces only the first occurance.
-    // .replaceAll was added in ECMA-262 (2021) but is not currently available in nodeJS.
-
-    while (val.indexOf(searchValue) > -1) {
-      val = val.replace(searchValue, replaceValue);
-    }
-
-    return val;
   }
 }
