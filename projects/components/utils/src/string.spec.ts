@@ -1,7 +1,7 @@
 import { replaceAll } from './string';
 
 describe('string utils', () => {
-  fit('replaceAll should work', () => {
+  it('replaceAll should work', () => {
     // use cases in number-input
     expect(replaceAll('5,000,000.00', ',', '')).toEqual('5000000.00');
     expect(replaceAll('5000000.00', '.', '.')).toEqual('5000000.00');
