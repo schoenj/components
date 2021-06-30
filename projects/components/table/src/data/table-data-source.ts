@@ -1,9 +1,11 @@
 import { DataSource, SelectionModel } from '@angular/cdk/collections';
 import { TrackByFunction } from '@angular/core';
-import { BehaviorSubject, NEVER, Observable, of, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, isObservable, NEVER, Observable, of, Subject, Subscription } from 'rxjs';
 import { catchError, finalize, map, take, tap } from 'rxjs/operators';
+
 import { _isNumberValue } from '../helper/table.helper';
-import { IExtendedPsTableUpdateDataInfo, IPsTableAction, IPsTableUpdateDataInfo, PsTableActionScope } from '../models';
+import { IExtendedPsTableUpdateDataInfo, IPsTableAction, IPsTableUpdateDataInfo, PsTableAction, PsTableActionScope } from '../models';
+
 /**
  * Corresponds to `Number.MAX_SAFE_INTEGER`. Moved out into a variable here due to
  * flaky browser support and the value not being defined in Closure's typings.
@@ -13,7 +15,7 @@ const MAX_SAFE_INTEGER = 9007199254740991;
 export interface PsTableDataSourceOptions<TData, TTrigger = any> {
   loadTrigger$?: Observable<TTrigger>;
   loadDataFn: (updateInfo: IExtendedPsTableUpdateDataInfo<TTrigger>) => Observable<TData[] | IPsTableFilterResult<TData>>;
-  actions?: IPsTableAction<TData>[];
+  actions?: IPsTableAction<TData>[] | Observable<IPsTableAction<TData>[]>;
   mode?: PsTableMode;
   moreMenuThreshold?: number;
 }
@@ -86,17 +88,28 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
   public readonly mode: PsTableMode;
 
   /** List of actions which can be executed for a single row */
-  public readonly rowActions: IPsTableAction<T>[];
+  public get rowActions(): PsTableAction<T>[] {
+    return this._rowActions || [];
+  }
+  private _rowActions: PsTableAction<T>[];
 
   /** List of actions which can be executed for a selection of rows */
-  public readonly listActions: IPsTableAction<T>[];
+  public get listActions(): PsTableAction<T>[] {
+    return this._listActions || [];
+  }
+  private _listActions: PsTableAction<T>[];
 
   public readonly moreMenuThreshold: number;
+
+  /** Action-Definition -> Action Store */
+  private readonly _store = new WeakMap<IPsTableAction<any>, PsTableAction<any>>();
 
   /** Stream that emits when a new data array is set on the data source. */
   private readonly _updateDataTrigger$: Observable<any>;
 
   private readonly _loadData: (updateInfo: IExtendedPsTableUpdateDataInfo<TTrigger>) => Observable<T[] | IPsTableFilterResult<T>>;
+
+  private readonly _actions: IPsTableAction<T>[] | Observable<IPsTableAction<T>[]>;
 
   /** Stream that emits when a new data array is set on the data source. */
   private readonly _data: BehaviorSubject<T[]> = new BehaviorSubject<T[]>([]);
@@ -108,6 +121,11 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
   private _hasData = false;
 
   private _lastLoadTriggerData: TTrigger = null;
+
+  /**
+   * Subscription to the result of the _actions observable.
+   */
+  private _loadActionsSubscription = Subscription.EMPTY;
 
   /**
    * Subscription to the result of the loadData function.
@@ -143,10 +161,7 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
       'loadDataFn' in optionsOrLoadDataFn ? optionsOrLoadDataFn : { loadDataFn: optionsOrLoadDataFn, actions: [], mode: mode };
 
     this.mode = options.mode || 'client';
-    // tslint:disable-next-line:no-bitwise
-    this.rowActions = options.actions?.filter((a) => a.scope & PsTableActionScope.row) || [];
-    // tslint:disable-next-line:no-bitwise
-    this.listActions = options.actions?.filter((a) => a.scope & PsTableActionScope.list) || [];
+    this._actions = options.actions;
     this._updateDataTrigger$ = options.loadTrigger$ || NEVER;
     this._loadData = options.loadDataFn;
     this.moreMenuThreshold = options.moreMenuThreshold ?? 3;
@@ -299,6 +314,49 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
   }
 
   /**
+   * Gets the existing PsTableAction object by the declaration from the store or creates a new one.
+   *
+   * Because actions can have async children, we cannot create for each declaration the coresponding PsTableAction at the beginning.
+   * This forces us to create the PsTableAction dynamicly. But we do not want to execute the same observables multiple times, so we cache them.
+   * Otherwise the observable would be executed for each row.
+   *
+   * @param declaration Action declaration information
+   * @returns Existing or new PsTableAction
+   */
+  public getAction(declaration: IPsTableAction<any>): PsTableAction<T> {
+    if (!this._store.has(declaration)) {
+      const action = new PsTableAction<T>(declaration, this);
+      this._store.set(declaration, action);
+    }
+
+    return this._store.get(declaration);
+  }
+
+  public updateActions(): void {
+    if (!this._actions) {
+      return;
+    }
+
+    const setActions = (actions: PsTableAction<T>[]) => {
+      this._rowActions = actions?.filter((a) => a.scope & PsTableActionScope.row) || [];
+      this._listActions = actions?.filter((a) => a.scope & PsTableActionScope.list) || [];
+    };
+
+    if (Array.isArray(this._actions) && this._actions.length) {
+      setActions(this._actions.map((x) => this.getAction(x)));
+    } else if (isObservable(this._actions)) {
+      this._loadActionsSubscription?.unsubscribe();
+      this._loadActionsSubscription = this._actions
+        .pipe(
+          take(1),
+          map((x) => x.map((y) => this.getAction(y))),
+          finalize(() => this._internalDetectChanges.next())
+        )
+        .subscribe((actions) => setActions(actions));
+    }
+  }
+
+  /**
    * Reloads the data
    */
   public updateData(forceReload: boolean = true) {
@@ -371,6 +429,7 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
       this._lastLoadTriggerData = data;
       this.updateData();
     });
+    this.updateActions();
     return this._renderData;
   }
 
@@ -382,6 +441,7 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
     this._renderChangesSubscription.unsubscribe();
     this._updateDataTriggerSub.unsubscribe();
     this._loadDataSubscription.unsubscribe();
+    this._loadActionsSubscription.unsubscribe();
   }
 
   /**

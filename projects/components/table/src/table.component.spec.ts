@@ -103,20 +103,14 @@ function createColDef(data: { property?: string; header?: string; sortable?: boo
         </ng-container>
       </ps-table-column>
 
-      <div *psTableCustomHeader>
-        custom header
-      </div>
+      <div *psTableCustomHeader>custom header</div>
 
       <div *psTableCustomSettings="let settings">custom settings {{ settings.pageSize }}</div>
 
-      <div *psTableTopButtonSection>
-        custom button section
-      </div>
+      <div *psTableTopButtonSection>custom button section</div>
 
       <ng-container *psTableListActions="let selection">
-        <button type="button" mat-menu-item (click)="onCustomListActionClick(selection)">
-          custom list actions
-        </button>
+        <button type="button" mat-menu-item (click)="onCustomListActionClick(selection)">custom list actions</button>
       </ng-container>
 
       <ng-container *psTableRowActions="let item">
@@ -782,6 +776,64 @@ describe('PsTableComponent', () => {
 
       const firstRowSecondPage = (await table.getRows())[0];
       expect(await (await firstRowSecondPage.getCells({ columnName: 'str' }))[0].getText()).toEqual('item 15');
+    });
+
+    describe('async table actions', () => {
+      beforeEach(async () => {
+        await initTestComponent(
+          new PsTableDataSource({
+            loadDataFn: () =>
+              of([
+                { id: 1, str: 'item 1' },
+                { id: 2, str: 'item 2' },
+                { id: 3, str: 'item 3' },
+              ]),
+            mode: 'client',
+            actions: of([
+              {
+                label: 'custom action',
+                icon: '',
+                scope: PsTableActionScope.all,
+                actionFn: (selection) => component.onListActionExecute(selection),
+              },
+              {
+                label: 'custom list action',
+                icon: '',
+                scope: PsTableActionScope.list,
+                actionFn: () => {},
+              },
+              {
+                label: 'custom row action',
+                icon: '',
+                scope: PsTableActionScope.row,
+                actionFn: () => {},
+              },
+            ]),
+          })
+        );
+      });
+
+      it('async list actions should work', async () => {
+        component.refreshable = false;
+        fixture.detectChanges();
+        const listActionsButtonHarness = await table.getListActionsButton();
+        await listActionsButtonHarness.open();
+        const listActions = await listActionsButtonHarness.getItems();
+        expect(listActions.length).toEqual(2);
+        expect(await listActions[0].getText()).toEqual('custom action');
+        expect(await listActions[1].getText()).toEqual('custom list action');
+      });
+
+      it('async row actions should work', async () => {
+        component.refreshable = false;
+        fixture.detectChanges();
+        const rowActionsButtonHarness = await table.getRowActionsButton(1);
+        await rowActionsButtonHarness.open();
+        const rowActions = await rowActionsButtonHarness.getItems();
+        expect(rowActions.length).toEqual(2);
+        expect(await rowActions[0].getText()).toEqual('custom action');
+        expect(await rowActions[1].getText()).toEqual('custom row action');
+      });
     });
   });
 });

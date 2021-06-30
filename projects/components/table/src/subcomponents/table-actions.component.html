@@ -6,12 +6,15 @@
   <ng-template matMenuContent>
     <ng-container *ngFor="let action of actions">
       <button
-        *ngIf="!action.children; else branch"
+        *ngIf="action.isLoading || !action.hasChildren; else branch"
         mat-menu-item
-        [disabled]="action.isDisabledFn && action.isDisabledFn(items)"
-        (click)="action.actionFn(items)"
+        [disabled]="action.isLoading || (action.isDisabledFn && action.isDisabledFn(items))"
+        (click)="action.actionFn && action.actionFn(items)"
       >
-        <mat-icon [style.color]="action.iconColor">{{ action.icon }}</mat-icon>
+        <mat-icon *ngIf="!action.isLoading" [style.color]="action.iconColor">{{ action.icon }}</mat-icon>
+        <mat-icon *ngIf="action.isLoading">
+          <mat-spinner mode="indeterminate" diameter="24"></mat-spinner>
+        </mat-icon>
         {{ action.label }}
       </button>
       <ng-template #branch>
@@ -19,7 +22,12 @@
           <mat-icon [style.color]="action.iconColor">{{ action.icon }}</mat-icon>
           {{ action.label }}
         </button>
-        <ps-table-actions #innerPanel [actions]="action.children | psTableActionsToRender: items" [items]="items"></ps-table-actions>
+        <ps-table-actions
+          #innerPanel
+          [actions]="action.children$ | async | psTableActionsToRender: items"
+          [items]="items"
+          [dataSource]="dataSource"
+        ></ps-table-actions>
       </ng-template>
     </ng-container>
     <!-- ng-content is deprecated here, as it doesn't work correctly, if it contains a mat-menu-item with a child met-menu -->

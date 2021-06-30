@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
@@ -77,6 +78,7 @@ import { PsTableComponent } from './table.component';
     MatInputModule,
     MatCardModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
     PsFlipContainerModule,
     PsSavebarModule,
     PsBlockUiModule,

@@ -3,7 +3,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { PsTableComponent, PsTableDataSource } from '@prosoft/components/table';
 import { PsTableActionScope } from '@prosoft/components/table/src/models';
 import { of, timer } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { delay, first, map } from 'rxjs/operators';
 
 interface ISampleData {
   id: number;
@@ -168,6 +168,45 @@ export class TableDemoComponent {
             ],
           },
         ],
+      },
+      {
+        label: 'async table actions',
+        icon: 'cancel',
+        scope: PsTableActionScope.all,
+        children: of([
+          {
+            label: 'async table action 1',
+            icon: 'cancel',
+            scope: PsTableActionScope.all,
+          },
+          {
+            label: 'async table action 2',
+            icon: 'cancel',
+            scope: PsTableActionScope.all,
+          },
+          {
+            label: 'async table action 3',
+            icon: 'cancel',
+            scope: PsTableActionScope.all,
+            children: of([
+              {
+                label: 'sub async table action 1',
+                icon: 'cancel',
+                scope: PsTableActionScope.all,
+              },
+              {
+                label: 'sub async table action 2',
+                icon: 'cancel',
+                scope: PsTableActionScope.all,
+              },
+              {
+                label: 'sub async table action 3',
+                icon: 'cancel',
+                scope: PsTableActionScope.all,
+              },
+            ]).pipe(delay(400)),
+          },
+        ]).pipe(delay(500)),
       },
     ],
   });
