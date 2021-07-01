@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, TemplateRef } from '@angular/core';
 
 import { PsTableDataSource } from '../data/table-data-source';
-import { PsTableAction } from '../models';
+import { PsTableAction, PsTableActionScope } from '../models';
 
 @Component({
   selector: 'ps-table-row-actions',
@@ -14,6 +14,8 @@ export class PsTableRowActionsComponent implements OnChanges {
   @Input() public dataSource: PsTableDataSource<{ [key: string]: any }>;
   @Input() public moreMenuThreshold: number;
   @Input() public item: any;
+
+  public psTableActionScopes = PsTableActionScope;
 
   public itemAsArray: any[];
 

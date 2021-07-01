@@ -21,7 +21,7 @@ export interface IExtendedPsTableUpdateDataInfo<TTrigger> extends IPsTableUpdate
   triggerData: TTrigger;
 }
 
-export const enum PsTableActionScope {
+export enum PsTableActionScope {
   row = 1,
   list = 2,
   // tslint:disable-next-line:no-bitwise
@@ -38,6 +38,8 @@ export interface IPsTableAction<T> {
   isDisabledFn?: (items: T[]) => boolean;
   isHiddenFn?: (items: T[]) => boolean;
   actionFn?: (items: T[]) => void;
+  routerLink?: (item: T) => [];
+  routerLinkQueryParams?: { [key: string]: any };
 }
 
 export class PsTableAction<T> {
@@ -51,6 +53,8 @@ export class PsTableAction<T> {
   public readonly actionFn?: (items: T[]) => void;
   public readonly isObservable: boolean;
   public readonly hasChildren: boolean;
+  public readonly routerLink?: (item: T) => string[];
+  public readonly routerLinkQueryParams?: { [key: string]: any };
   public children$: Observable<PsTableAction<T>[]>;
 
   public get isLoading(): boolean {
@@ -67,6 +71,8 @@ export class PsTableAction<T> {
     this.isDisabledFn = declaration.isDisabledFn;
     this.isHiddenFn = declaration.isHiddenFn;
     this.actionFn = declaration.actionFn;
+    this.routerLink = declaration.routerLink;
+    this.routerLinkQueryParams = declaration.routerLinkQueryParams;
 
     this.isObservable = isObservable(declaration.children);
     this.hasChildren = Array.isArray(declaration.children) || this.isObservable;

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { PsTableComponent, PsTableDataSource } from '@prosoft/components/table';
-import { PsTableActionScope } from '@prosoft/components/table/src/models';
+import { IPsTableAction, PsTableActionScope } from '@prosoft/components/table/src/models';
 import { of, timer } from 'rxjs';
 import { delay, first, map } from 'rxjs/operators';
 
@@ -194,6 +194,7 @@ export class TableDemoComponent {
                 label: 'sub async table action 1',
                 icon: 'cancel',
                 scope: PsTableActionScope.all,
+                routerLink: (item: ISampleData) => ['..', item.id],
               },
               {
                 label: 'sub async table action 2',
@@ -207,7 +208,7 @@ export class TableDemoComponent {
               },
             ]).pipe(delay(400)),
           },
-        ]).pipe(delay(500)),
+        ] as IPsTableAction<ISampleData>[]).pipe(delay(500)),
       },
     ],
   });

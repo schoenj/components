@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
 import { PsBlockUiModule } from '@prosoft/components/block-ui';
 import { PsFlipContainerModule } from '@prosoft/components/flip-container';
 import { PsSavebarModule } from '@prosoft/components/savebar';
@@ -67,6 +68,7 @@ import { PsTableComponent } from './table.component';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     MatSortModule,
     MatTableModule,
     MatPaginatorModule,

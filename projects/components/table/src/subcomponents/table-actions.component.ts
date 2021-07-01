@@ -5,7 +5,7 @@ import { merge, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { PsTableDataSource } from '../data/table-data-source';
-import { PsTableAction } from '../models';
+import { PsTableAction, PsTableActionScope } from '../models';
 
 @Component({
   selector: 'ps-table-actions',
@@ -34,6 +34,9 @@ export class PsTableActionsComponent implements OnDestroy {
   @Input() public refreshable: boolean;
   @Input() public settingsEnabled: boolean;
   @Input() public intl: IPsTableIntlTexts;
+  @Input() public scope: PsTableActionScope;
+
+  public psTableActionScopes = PsTableActionScope;
 
   @Output() public refreshData = new EventEmitter<void>();
   @Output() public showSettings = new EventEmitter<void>();
