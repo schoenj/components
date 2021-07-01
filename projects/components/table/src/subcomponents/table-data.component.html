@@ -57,7 +57,6 @@
           [refreshable]="refreshable"
           [settingsEnabled]="settingsEnabled"
           [intl]="intl"
-          [dataSource]="dataSource"
           [scope]="psTableActionScopes.list"
           (refreshData)="onRefreshDataClicked()"
           (showSettings)="onShowSettingsClicked()"
@@ -70,7 +69,6 @@
       <ps-table-row-actions
         [actions]="dataSource.rowActions"
         [actionsTemplate]="rowActions"
-        [dataSource]="dataSource"
         [item]="element"
         [moreMenuThreshold]="dataSource.moreMenuThreshold"
       ></ps-table-row-actions>

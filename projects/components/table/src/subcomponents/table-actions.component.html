@@ -37,7 +37,6 @@
           #innerPanel
           [actions]="action.children$ | async | psTableActionsToRender: items"
           [items]="items"
-          [dataSource]="dataSource"
           [scope]="scope"
         ></ps-table-actions>
       </ng-template>

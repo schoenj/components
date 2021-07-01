@@ -3,13 +3,7 @@
     <button mat-icon-button type="button" [matMenuTriggerFor]="rowActionsComponent.menu">
       <mat-icon>more_vert</mat-icon>
     </button>
-    <ps-table-actions
-      #rowActionsComponent
-      [actions]="actions"
-      [items]="itemAsArray"
-      [dataSource]="dataSource"
-      [scope]="psTableActionScopes.row"
-    >
+    <ps-table-actions #rowActionsComponent [actions]="actions" [items]="itemAsArray" [scope]="psTableActionScopes.row">
       <ng-container [ngTemplateOutlet]="actionsTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
     </ps-table-actions>
   </ng-container>
@@ -40,7 +34,6 @@
           #iconActions
           [actions]="action.children"
           [items]="itemAsArray"
-          [dataSource]="dataSource"
           [scope]="psTableActionScopes.row"
         ></ps-table-actions>
       </ng-template>

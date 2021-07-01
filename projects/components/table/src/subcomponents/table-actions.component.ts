@@ -4,7 +4,6 @@ import { IPsTableIntlTexts } from '@prosoft/components/core';
 import { merge, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { PsTableDataSource } from '../data/table-data-source';
 import { PsTableAction, PsTableActionScope } from '../models';
 
 @Component({
@@ -29,7 +28,6 @@ export class PsTableActionsComponent implements OnDestroy {
     }
   }
   private _actions: PsTableAction<unknown>[];
-  @Input() public dataSource: PsTableDataSource<{ [key: string]: any }>;
   @Input() public items: unknown[];
   @Input() public refreshable: boolean;
   @Input() public settingsEnabled: boolean;

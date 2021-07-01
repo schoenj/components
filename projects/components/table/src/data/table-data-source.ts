@@ -2,6 +2,7 @@ import { DataSource, SelectionModel } from '@angular/cdk/collections';
 import { TrackByFunction } from '@angular/core';
 import { BehaviorSubject, isObservable, NEVER, Observable, of, Subject, Subscription } from 'rxjs';
 import { catchError, finalize, map, take, tap } from 'rxjs/operators';
+import { PsTableActionStore, PsTableActionStoreBase } from '../helper/action-store';
 
 import { _isNumberValue } from '../helper/table.helper';
 import { IExtendedPsTableUpdateDataInfo, IPsTableAction, IPsTableUpdateDataInfo, PsTableAction, PsTableActionScope } from '../models';
@@ -101,8 +102,8 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
 
   public readonly moreMenuThreshold: number;
 
-  /** Action-Definition -> Action Store */
-  private readonly _store = new WeakMap<IPsTableAction<any>, PsTableAction<any>>();
+  /** Stores table actions.*/
+  private readonly _store: PsTableActionStoreBase<T> = new PsTableActionStore<T>();
 
   /** Stream that emits when a new data array is set on the data source. */
   private readonly _updateDataTrigger$: Observable<any>;
@@ -313,25 +314,6 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
     return data;
   }
 
-  /**
-   * Gets the existing PsTableAction object by the declaration from the store or creates a new one.
-   *
-   * Because actions can have async children, we cannot create for each declaration the coresponding PsTableAction at the beginning.
-   * This forces us to create the PsTableAction dynamicly. But we do not want to execute the same observables multiple times, so we cache them.
-   * Otherwise the observable would be executed for each row.
-   *
-   * @param declaration Action declaration information
-   * @returns Existing or new PsTableAction
-   */
-  public getAction(declaration: IPsTableAction<any>): PsTableAction<T> {
-    if (!this._store.has(declaration)) {
-      const action = new PsTableAction<T>(declaration, this);
-      this._store.set(declaration, action);
-    }
-
-    return this._store.get(declaration);
-  }
-
   public updateActions(): void {
     if (!this._actions) {
       return;
@@ -343,13 +325,13 @@ export class PsTableDataSource<T, TTrigger = any> extends DataSource<T> {
     };
 
     if (Array.isArray(this._actions) && this._actions.length) {
-      setActions(this._actions.map((x) => this.getAction(x)));
+      setActions(this._actions.map((x) => this._store.get(x)));
     } else if (isObservable(this._actions)) {
       this._loadActionsSubscription?.unsubscribe();
       this._loadActionsSubscription = this._actions
         .pipe(
           take(1),
-          map((x) => x.map((y) => this.getAction(y))),
+          map((x) => x.map((y) => this._store.get(y))),
           finalize(() => this._internalDetectChanges.next())
         )
         .subscribe((actions) => setActions(actions));

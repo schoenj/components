@@ -1,6 +1,6 @@
 import { isObservable, Observable, of } from 'rxjs';
 import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { PsTableDataSource } from './data/table-data-source';
+import { PsTableActionStoreBase } from './helper/action-store';
 
 export interface IPsTableSortDefinition {
   prop: string;
@@ -62,7 +62,7 @@ export class PsTableAction<T> {
   }
   private _isLoading = false;
 
-  constructor(declaration: IPsTableAction<T>, private dataSource: PsTableDataSource<T>) {
+  constructor(declaration: IPsTableAction<T>, store: PsTableActionStoreBase<T>) {
     this.label = declaration.label;
     this.icon = declaration.icon;
     this.isSvgIcon = declaration.isSvgIcon === true;
@@ -84,9 +84,9 @@ export class PsTableAction<T> {
             switchMap(() => declaration.children as Observable<IPsTableAction<T>[]>),
             tap(() => (this._isLoading = false)),
             shareReplay({ bufferSize: 1, refCount: false }),
-            map((x) => x.map((y) => this.dataSource.getAction(y) as PsTableAction<T>) || [])
+            map((x) => x.map((y) => store.get(y) as PsTableAction<T>) || [])
           )
-        : of(declaration.children.map((x) => this.dataSource.getAction(x) as PsTableAction<T>));
+        : of(declaration.children.map((x) => store.get(x) as PsTableAction<T>));
     } else {
       this.children$ = of([]);
     }
