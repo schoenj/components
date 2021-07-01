@@ -11,17 +11,12 @@
         [disabled]="action.isLoading || (action.isDisabledFn && action.isDisabledFn(items))"
         (click)="action.actionFn && action.actionFn(items)"
       >
-        <mat-icon *ngIf="!action.isLoading && !action.isSvgIcon" [style.color]="action.iconColor">{{ action.icon }}</mat-icon>
-        <mat-icon *ngIf="!action.isLoading && action.isSvgIcon" [style.color]="action.iconColor" [svgIcon]="action.icon"></mat-icon>
-        <mat-icon *ngIf="action.isLoading">
-          <mat-spinner mode="indeterminate" diameter="24"></mat-spinner>
-        </mat-icon>
+        <ng-container [ngTemplateOutlet]="actionIcon" [ngTemplateOutletContext]="{ $implicit: action }"></ng-container>
         {{ action.label }}
       </button>
       <ng-template #branch>
         <button mat-menu-item [matMenuTriggerFor]="innerPanel.menu">
-          <mat-icon *ngIf="action.isSvgIcon" [style.color]="action.iconColor" [svgIcon]="action.icon"></mat-icon>
-          <mat-icon *ngIf="!action.isSvgIcon" [style.color]="action.iconColor">{{ action.icon }}</mat-icon>
+          <ng-container [ngTemplateOutlet]="actionIcon" [ngTemplateOutletContext]="{ $implicit: action }"></ng-container>
           {{ action.label }}
         </button>
         <ps-table-actions
@@ -44,3 +39,11 @@
     </button>
   </ng-template>
 </mat-menu>
+
+<ng-template #actionIcon let-action>
+  <mat-icon *ngIf="!action.isLoading && !action.isSvgIcon" [style.color]="action.iconColor">{{ action.icon }}</mat-icon>
+  <mat-icon *ngIf="!action.isLoading && action.isSvgIcon" [style.color]="action.iconColor" [svgIcon]="action.icon"></mat-icon>
+  <mat-icon *ngIf="action.isLoading">
+    <mat-spinner mode="indeterminate" diameter="24"></mat-spinner>
+  </mat-icon>
+</ng-template>
