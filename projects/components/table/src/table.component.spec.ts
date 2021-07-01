@@ -5,8 +5,10 @@ import { ChangeDetectorRef, Component, Injectable, QueryList, ViewChild } from '
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { IconType, MatIconHarness } from '@angular/material/icon/testing';
 import { MatMenuItemHarness } from '@angular/material/menu/testing';
+import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, convertToParamMap, ParamMap, Params, Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, ParamMap, Params, RouterLinkWithHref } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { IPsTableIntlTexts, PsIntlService, PsIntlServiceEn } from '@prosoft/components/core';
 import { filterAsync } from '@prosoft/components/utils/src/array';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -15,7 +17,7 @@ import { map } from 'rxjs/operators';
 import { PsTableDataSource } from './data/table-data-source';
 import { PsTableColumnDirective } from './directives/table.directives';
 import { PsTableMemoryStateManager } from './helper/state-manager';
-import { IPsTableSortDefinition, PsTableActionScope } from './models';
+import { IPsTableAction, IPsTableSortDefinition, PsTableActionScope } from './models';
 import { IPsTableSetting, PsTableSettingsService } from './services/table-settings.service';
 import { PsTablePaginationComponent } from './subcomponents/table-pagination.component';
 import { PsTableComponent } from './table.component';
@@ -43,6 +45,7 @@ class TestSettingsService extends PsTableSettingsService {
 
 const router: any = {
   navigate: (_route: any, _options: any) => {},
+  navigateByUrl: (_urltree: any, _extras: any) => {},
 };
 
 const queryParams$ = new BehaviorSubject<ParamMap>(convertToParamMap({ other: 'value' }));
@@ -480,16 +483,12 @@ describe('PsTableComponent', () => {
     }
 
     beforeEach(async () => {
-      queryParams$.next(convertToParamMap({}));
-
       await TestBed.configureTestingModule({
-        imports: [NoopAnimationsModule, CommonModule, PsTableModule],
+        imports: [NoopAnimationsModule, CommonModule, PsTableModule, RouterTestingModule],
         declarations: [TestComponent],
         providers: [
           { provide: PsTableSettingsService, useClass: TestSettingsService },
           { provide: PsIntlService, useClass: PsIntlServiceEn },
-          { provide: ActivatedRoute, useValue: route },
-          { provide: Router, useValue: router },
         ],
       });
 
@@ -823,7 +822,10 @@ describe('PsTableComponent', () => {
                 label: 'custom row action 1',
                 icon: 'list',
                 scope: PsTableActionScope.row,
-                actionFn: () => {},
+                routerLink: (item: any) => [item.id],
+                routerLinkQueryParams: (item: any) => ({
+                  a: item.str.replace(' ', '_'),
+                }),
               },
               {
                 label: 'custom row action 2',
@@ -832,7 +834,7 @@ describe('PsTableComponent', () => {
                 scope: PsTableActionScope.row,
                 actionFn: () => {},
               },
-            ],
+            ] as IPsTableAction<any>[],
           })
         );
 
@@ -863,6 +865,19 @@ describe('PsTableComponent', () => {
         await checkAction$(rowActionHarnesses[1], 'angular', IconType.SVG, 'custom action 2');
         await checkAction$(rowActionHarnesses[2], 'list', IconType.FONT, 'custom row action 1');
         await checkAction$(rowActionHarnesses[3], 'angular', IconType.SVG, 'custom row action 2');
+      });
+
+      it('routerlinks should be displayed correctly', async () => {
+        fixture.detectChanges();
+
+        const rowActionButtonHarness = await table.getRowActionsButton(1);
+        await rowActionButtonHarness.open();
+        const rowActionHarnesses = await rowActionButtonHarness.getItems();
+        expect(rowActionHarnesses.length).toBe(4);
+
+        const links = fixture.debugElement.queryAll(By.directive(RouterLinkWithHref));
+        expect(links.length).toEqual(1);
+        expect(links[0].attributes['href']).toEqual('/1?a=item_1');
       });
 
       async function checkAction$(

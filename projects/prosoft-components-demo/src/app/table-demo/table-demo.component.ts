@@ -193,8 +193,7 @@ export class TableDemoComponent {
               {
                 label: 'sub async table action 1',
                 icon: 'cancel',
-                scope: PsTableActionScope.all,
-                routerLink: (item: ISampleData) => ['..', item.id],
+                scope: PsTableActionScope.row,
               },
               {
                 label: 'sub async table action 2',
@@ -207,6 +206,15 @@ export class TableDemoComponent {
                 scope: PsTableActionScope.all,
               },
             ]).pipe(delay(400)),
+          },
+          {
+            label: 'router link',
+            icon: 'cancel',
+            scope: PsTableActionScope.row,
+            routerLink: (item: ISampleData) => ['..', item.id],
+            routerLinkQueryParams: (item: ISampleData) => ({
+              a: item.string,
+            }),
           },
         ] as IPsTableAction<ISampleData>[]).pipe(delay(500)),
       },

@@ -39,7 +39,7 @@ export interface IPsTableAction<T> {
   isHiddenFn?: (items: T[]) => boolean;
   actionFn?: (items: T[]) => void;
   routerLink?: (item: T) => [];
-  routerLinkQueryParams?: { [key: string]: any };
+  routerLinkQueryParams?: (item: T) => { [key: string]: any };
 }
 
 export class PsTableAction<T> {
@@ -54,7 +54,7 @@ export class PsTableAction<T> {
   public readonly isObservable: boolean;
   public readonly hasChildren: boolean;
   public readonly routerLink?: (item: T) => string[];
-  public readonly routerLinkQueryParams?: { [key: string]: any };
+  public readonly routerLinkQueryParams?: (item: T) => { [key: string]: any };
   public children$: Observable<PsTableAction<T>[]>;
 
   public get isLoading(): boolean {

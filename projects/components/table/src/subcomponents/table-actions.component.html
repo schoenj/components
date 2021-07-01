@@ -11,7 +11,7 @@
           mat-menu-item
           [disabled]="action.isLoading || (action.isDisabledFn && action.isDisabledFn(items))"
           [routerLink]="action.routerLink(items[0])"
-          [queryParams]="action.routerLinkQueryParams"
+          [queryParams]="(action.routerLinkQueryParams && action.routerLinkQueryParams(items[0])) || undefined"
         >
           <ng-container [ngTemplateOutlet]="actionIcon" [ngTemplateOutletContext]="{ $implicit: action }"></ng-container>
           {{ action.label }}
