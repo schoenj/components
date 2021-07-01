@@ -171,7 +171,8 @@ export class TableDemoComponent {
       },
       {
         label: 'async table actions',
-        icon: 'cancel',
+        icon: 'angular',
+        isSvgIcon: true,
         scope: PsTableActionScope.all,
         children: of([
           {

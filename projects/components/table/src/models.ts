@@ -31,6 +31,7 @@ export const enum PsTableActionScope {
 export interface IPsTableAction<T> {
   label: string;
   icon: string;
+  isSvgIcon?: boolean;
   iconColor?: string;
   children?: IPsTableAction<T>[] | Observable<IPsTableAction<T>[]>;
   scope: PsTableActionScope;
@@ -42,13 +43,14 @@ export interface IPsTableAction<T> {
 export class PsTableAction<T> {
   public readonly label: string;
   public readonly icon: string;
+  public readonly isSvgIcon: boolean;
   public readonly iconColor?: string;
   public readonly scope: PsTableActionScope;
   public readonly isDisabledFn?: (items: T[]) => boolean;
   public readonly isHiddenFn?: (items: T[]) => boolean;
   public readonly actionFn?: (items: T[]) => void;
   public readonly isObservable: boolean;
-
+  public readonly hasChildren: boolean;
   public children$: Observable<PsTableAction<T>[]>;
 
   public get isLoading(): boolean {
@@ -56,14 +58,10 @@ export class PsTableAction<T> {
   }
   private _isLoading = false;
 
-  public get hasChildren(): boolean {
-    return this._hasChildren;
-  }
-  private _hasChildren = false;
-
   constructor(declaration: IPsTableAction<T>, private dataSource: PsTableDataSource<T>) {
     this.label = declaration.label;
     this.icon = declaration.icon;
+    this.isSvgIcon = declaration.isSvgIcon === true;
     this.iconColor = declaration.iconColor;
     this.scope = declaration.scope;
     this.isDisabledFn = declaration.isDisabledFn;
@@ -71,9 +69,9 @@ export class PsTableAction<T> {
     this.actionFn = declaration.actionFn;
 
     this.isObservable = isObservable(declaration.children);
-    this._hasChildren = Array.isArray(declaration.children) || this.isObservable;
+    this.hasChildren = Array.isArray(declaration.children) || this.isObservable;
 
-    if (this._hasChildren) {
+    if (this.hasChildren) {
       this.children$ = isObservable(declaration.children)
         ? of(void 0).pipe(
             tap(() => (this._isLoading = true)),
