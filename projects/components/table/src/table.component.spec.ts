@@ -3,12 +3,16 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, Injectable, QueryList, ViewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { IconType, MatIconHarness, MatIconTestingModule } from '@angular/material/icon/testing';
+import { MatMenuItemHarness } from '@angular/material/menu/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, convertToParamMap, ParamMap, Params, Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, ParamMap, Params } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { IPsTableIntlTexts, PsIntlService, PsIntlServiceEn } from '@prosoft/components/core';
 import { filterAsync } from '@prosoft/components/utils/src/array';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { PsTableDataSource } from './data/table-data-source';
 import { PsTableColumnDirective } from './directives/table.directives';
 import { PsTableMemoryStateManager } from './helper/state-manager';
@@ -103,20 +107,14 @@ function createColDef(data: { property?: string; header?: string; sortable?: boo
         </ng-container>
       </ps-table-column>
 
-      <div *psTableCustomHeader>
-        custom header
-      </div>
+      <div *psTableCustomHeader>custom header</div>
 
       <div *psTableCustomSettings="let settings">custom settings {{ settings.pageSize }}</div>
 
-      <div *psTableTopButtonSection>
-        custom button section
-      </div>
+      <div *psTableTopButtonSection>custom button section</div>
 
       <ng-container *psTableListActions="let selection">
-        <button type="button" mat-menu-item (click)="onCustomListActionClick(selection)">
-          custom list actions
-        </button>
+        <button type="button" mat-menu-item (click)="onCustomListActionClick(selection)">custom list actions</button>
       </ng-container>
 
       <ng-container *psTableRowActions="let item">
@@ -483,16 +481,12 @@ describe('PsTableComponent', () => {
     }
 
     beforeEach(async () => {
-      queryParams$.next(convertToParamMap({}));
-
       await TestBed.configureTestingModule({
-        imports: [NoopAnimationsModule, CommonModule, PsTableModule],
+        imports: [NoopAnimationsModule, CommonModule, PsTableModule, RouterTestingModule, MatIconTestingModule],
         declarations: [TestComponent],
         providers: [
           { provide: PsTableSettingsService, useClass: TestSettingsService },
           { provide: PsIntlService, useClass: PsIntlServiceEn },
-          { provide: ActivatedRoute, useValue: route },
-          { provide: Router, useValue: router },
         ],
       });
 
@@ -782,6 +776,141 @@ describe('PsTableComponent', () => {
 
       const firstRowSecondPage = (await table.getRows())[0];
       expect(await (await firstRowSecondPage.getCells({ columnName: 'str' }))[0].getText()).toEqual('item 15');
+    });
+
+    fdescribe('table actions', () => {
+      beforeEach(async () => {
+        await initTestComponent(
+          new PsTableDataSource({
+            loadDataFn: () =>
+              of([
+                { id: 1, str: 'item 1' },
+                { id: 2, str: 'item 2' },
+                { id: 3, str: 'item 3' },
+              ]),
+            mode: 'client',
+            actions: [
+              {
+                label: 'custom all action 1',
+                icon: 'check',
+                scope: PsTableActionScope.all,
+                children: [
+                  {
+                    label: 'custom all subaction 1',
+                    icon: 'check',
+                    scope: PsTableActionScope.row,
+                  },
+                  {
+                    label: 'custom all subaction 2',
+                    icon: 'angular',
+                    isSvgIcon: true,
+                    scope: PsTableActionScope.row,
+                  },
+                ],
+              },
+              {
+                label: 'custom all action 2',
+                icon: 'angular',
+                isSvgIcon: true,
+                scope: PsTableActionScope.all,
+                isHiddenFn: (items: any[]) => !items.length,
+                routerLink: (items: any[]) => ({
+                  path: ['/', 'path', 'to', 'something', items[0].id],
+                  queryParams: { a: items[0].id.replace(' ', '_') },
+                }),
+              },
+              {
+                label: 'custom list action 1',
+                icon: 'check',
+                scope: PsTableActionScope.list,
+              },
+              {
+                label: 'custom list action 2',
+                icon: 'angular',
+                isSvgIcon: true,
+                scope: PsTableActionScope.list,
+              },
+              {
+                label: 'custom row action 1',
+                icon: 'check',
+                scope: PsTableActionScope.row,
+              },
+              {
+                label: 'custom row action 2',
+                icon: 'angular',
+                isSvgIcon: true,
+                scope: PsTableActionScope.row,
+              },
+            ],
+          })
+        );
+
+        component.filterable = false;
+        component.refreshable = false;
+        component.showSettings = false;
+      });
+
+      it('routerlink should work', async () => {
+        const listActionsMenu = await table.getListActionsButton();
+        await listActionsMenu.open();
+        const listActions = await listActionsMenu.getItems();
+        expect(listActions.length).toEqual(4);
+
+        const action = listActions[1];
+        expect(action).toBeTruthy();
+      });
+
+      it('svg icons should work', async () => {
+        // List-Actions
+        const listActionsMenu = await table.getListActionsButton();
+        await listActionsMenu.open();
+        const listActions = await listActionsMenu.getItems();
+        expect(listActions.length).toEqual(4);
+
+        // List-Actions - 1. Level
+        await checkAction$(listActions[0], 'custom all action 1', 'check', IconType.FONT);
+        await checkAction$(listActions[1], 'custom all action 2', 'angular', IconType.SVG);
+        await checkAction$(listActions[2], 'custom list action 1', 'check', IconType.FONT);
+        await checkAction$(listActions[3], 'custom list action 2', 'angular', IconType.SVG);
+
+        // List-Actions - 2. Level
+        expect(await listActions[0].hasSubmenu()).toBeTrue();
+        const subListActionsMenu = await listActions[0].getSubmenu();
+        expect(subListActionsMenu).toBeTruthy();
+        await subListActionsMenu.open();
+        const subListActions = await subListActionsMenu.getItems();
+        expect(subListActions.length).toEqual(2);
+        await checkAction$(subListActions[0], 'custom all subaction 1', 'check', IconType.FONT);
+        await checkAction$(subListActions[1], 'custom all subaction 2', 'angular', IconType.SVG);
+
+        // Row-Actions
+        const rowActionsMenu = await table.getRowActionsButton(1);
+        await rowActionsMenu.open();
+        const rowActions = await rowActionsMenu.getItems();
+        expect(rowActions.length).toEqual(4);
+
+        // Row-Actions - 1. Level
+        await checkAction$(rowActions[0], 'custom all action 1', 'check', IconType.FONT);
+        await checkAction$(rowActions[1], 'custom all action 2', 'angular', IconType.SVG);
+        await checkAction$(rowActions[2], 'custom row action 1', 'check', IconType.FONT);
+        await checkAction$(rowActions[3], 'custom row action 2', 'angular', IconType.SVG);
+      });
+
+      async function checkAction$(
+        matMenuItemHarness: MatMenuItemHarness,
+        expectedText: string,
+        expectedIcon: string,
+        expectedType: IconType
+      ): Promise<void> {
+        expect(matMenuItemHarness).toBeTruthy();
+
+        // toContain instead of toEqual, because the result of getText() can contain the icon name if it is not a svgIcon
+        expect(await matMenuItemHarness.getText()).toContain(expectedText);
+        const matIconHarness = await matMenuItemHarness.getHarness(MatIconHarness);
+        expect(matIconHarness).toBeTruthy();
+        expect(await matIconHarness.getName()).toEqual(expectedIcon);
+        expect(await matIconHarness.getType()).toEqual(expectedType);
+      }
     });
   });
 });

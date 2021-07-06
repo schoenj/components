@@ -167,6 +167,12 @@ export class TableDemoComponent {
               },
             ],
           },
+          {
+            label: 'allChildAction 3',
+            icon: 'angular',
+            isSvgIcon: true,
+            scope: PsTableActionScope.all,
+          },
         ],
       },
     ],
